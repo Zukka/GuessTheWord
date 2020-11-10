@@ -52,27 +52,21 @@ class GameFragment : Fragment() {
         Log.i("GameFragment", "Called ViewModelProviders.of")
         viewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
-        binding.correctButton.setOnClickListener { onCorrect() }
-        binding.skipButton.setOnClickListener { onSkip() }
+        binding.correctButton.setOnClickListener {
+            viewModel.onCorrect()
+            updateWordText()
+            updateScoreText()
+        }
+        binding.skipButton.setOnClickListener {
+            viewModel.onSkip()
+            updateWordText()
+            updateScoreText()
+        }
         binding.endGameButton.setOnClickListener { onEndGame() }
         updateScoreText()
         updateWordText()
         return binding.root
 
-    }
-
-    /** Methods for buttons presses **/
-
-    private fun onSkip() {
-        viewModel.onSkip()
-        updateWordText()
-        updateScoreText()
-    }
-
-    private fun onCorrect() {
-        viewModel.onCorrect()
-        updateWordText()
-        updateScoreText()
     }
 
     /** Methods for updating the UI **/
