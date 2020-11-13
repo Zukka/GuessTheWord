@@ -22,6 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.example.android.guesstheword.R
@@ -52,7 +53,15 @@ class ScoreFragment : Fragment() {
         viewModelFactory = ScoreViewModelFactory(ScoreFragmentArgs.fromBundle(arguments!!).score)
         viewModel = ViewModelProvider(this, viewModelFactory).get(ScoreViewModel::class.java)
 
-        binding.scoreText.text = viewModel.score.toString()
+        viewModel.score.observe(this, Observer {
+            binding.scoreText.text = viewModel.score.toString()
+        })
+
+        viewModel.eventPlayAgain.observe( this, Observer { playAgain ->
+            if (playAgain) {
+                binding.playAgainButton.callOnClick()
+            }
+        })
 
         return binding.root
     }
