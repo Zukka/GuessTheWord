@@ -19,4 +19,12 @@ class ScoreViewModel(finalScore : Int) : ViewModel() {
         _score.value = finalScore
         Log.i("ScoreViewModel", "Final score is ${_score.value}")
     }
+
+    fun onPlayAgain() {
+        _eventPlayAgain.value = true
+    }
+
+    fun onPlayAgainComplete() {
+        _eventPlayAgain.value = false
+    }
 }
