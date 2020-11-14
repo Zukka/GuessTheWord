@@ -17,15 +17,30 @@
 package com.example.android.guesstheword.screens.game
 
 import android.os.CountDownTimer
+import android.text.format.DateUtils
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import java.time.format.DateTimeFormatter
 
 
 /**
  * ViewModel containing all the logic needed to run the game
  */
+private val CORRECT_BUZZ_PATTERN = longArrayOf(100, 100, 100, 100, 100, 100)
+private val PANIC_BUZZ_PATTERN = longArrayOf(0, 200)
+private val GAME_OVER_BUZZ_PATTERN = longArrayOf(0, 2000)
+private val NO_BUZZ_PATTERN = longArrayOf(0)
+
 class GameViewModel : ViewModel() {
+
+    enum class BuzzType(val pattern: LongArray) {
+        CORRECT(CORRECT_BUZZ_PATTERN),
+        GAME_OVER(GAME_OVER_BUZZ_PATTERN),
+        COUNTDOWN_PANIC(PANIC_BUZZ_PATTERN),
+        NO_BUZZ(NO_BUZZ_PATTERN)
+    }
 
     companion object {
         // These represent different important times in the game, such as game length.
@@ -41,11 +56,18 @@ class GameViewModel : ViewModel() {
 
     }
 
-    private val timer: CountDownTimer
+    private val _buzzEvent = MutableLiveData<BuzzType>()
+    val buzzEvent: LiveData<BuzzType>
+        get() = _buzzEvent
 
+    private val timer: CountDownTimer
     private val _currentTime = MutableLiveData<Long>()
     val currentTime: LiveData<Long>
         get() = _currentTime
+
+    var currentTimeString = Transformations.map(currentTime) { time ->
+        DateUtils.formatElapsedTime(time)
+    }
 
     // The current word
     private val _word = MutableLiveData<String>()
@@ -133,17 +155,24 @@ class GameViewModel : ViewModel() {
 
     fun onSkip() {
         _score.value = (_score.value)?.minus(1)
+        _buzzEvent.value = BuzzType.COUNTDOWN_PANIC
         nextWord()
     }
 
     fun onCorrect() {
         _score.value = (_score.value)?.plus(1)
+        _buzzEvent.value = BuzzType.CORRECT
         nextWord()
+    }
+
+    fun onBuzzComplete() {
+        _buzzEvent.value = BuzzType.NO_BUZZ
     }
 
     /** Methods for completed events **/
 
     fun onGameFinishComplete() {
+        _buzzEvent.value = BuzzType.GAME_OVER
         _eventGameFinish.value = false
     }
 
